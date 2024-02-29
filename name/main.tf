@@ -103,7 +103,6 @@ resource "azurerm_windows_virtual_machine" "app_vm" {
   ]
 }
 
-
 resource "azurerm_private_link_service" "example" {
   name                = "example-privatelink"
   location            = azurerm_resource_group.example.location
@@ -114,6 +113,7 @@ resource "azurerm_private_link_service" "example" {
     primary   = true
     subnet_id = azurerm_subnet.service.id
   }
+}
 
 
 resource "azurerm_private_endpoint" "example" {
