@@ -28,12 +28,12 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory : main.tf
+        working-directory : name
 
       - name: Terraform Plan
         run: terraform plan
-        working-directory : main.tf
+        working-directory : name
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
-        working-directory : main.tf
+        working-directory : name
