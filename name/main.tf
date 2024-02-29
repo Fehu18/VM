@@ -20,13 +20,13 @@ provider "azurerm" {
 
 
 locals {
-  resource_group="app-grp"
+  resource_group="app-test"
   location="North Europe"
 }
 
 data "azurerm_client_config" "current" {}
 
-resource "azurerm_resource_group" "app_grp"{
+resource "azurerm_resource_group" "app_test"{
   name=local.resource_group
   location=local.location
 }
@@ -105,8 +105,8 @@ resource "azurerm_public_ip" "app_public_ip" {
   ]
 }
 
-resource "azurerm_key_vault" "app_vault" {  
-  name                        = "appvault9087123"
+resource "azurerm_key_vault" "app_vaul" {  
+  name                        = "appvault908942"
   location                    = local.location
   resource_group_name         = local.resource_group  
   tenant_id                   = data.azurerm_client_config.current.tenant_id
@@ -127,6 +127,6 @@ access_policy {
 resource "azurerm_key_vault_secret" "vmpassword" {
   name         = "vmpassword"
   value        = "Azure@123"
-  key_vault_id = azurerm_key_vault.app_vault.id
-  depends_on = [ azurerm_key_vault.app_vault ]
+  key_vault_id = azurerm_key_vault.app_vaul.id
+  depends_on = [ azurerm_key_vault.app_vaul ]
 }
