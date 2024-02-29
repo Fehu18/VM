@@ -17,6 +17,7 @@ provider "azurerm" {
   tenant_id       = "6a7cad51-05b4-4ea3-8435-b2157749ac6b"
 }
 
+
 locals {
   resource_group="app-grp"
   location="North Europe"
@@ -45,7 +46,7 @@ resource "azurerm_subnet" "SubnetA" {
     azurerm_virtual_network.app_network
   ]
 }
-resource "azurerm_subnet" "subnetB" {
+resource "azurerm_subnet" "subnet_KV" {
   name                 = "subnetB"
   resource_group_name  = local.resource_group
   virtual_network_name = azurerm_virtual_network.app_network.name
@@ -54,18 +55,28 @@ resource "azurerm_subnet" "subnetB" {
     azurerm_virtual_network.app_network
   ]
 }
+data "azurerm_private_dns_zone" "key_vault_dns_private_zone" {
+  name     = "privatelink.vaultcore.azure.net"
+  provider = azurerm.dnsprod
+  resource_group_name = local.resource_group
+}
 
-resource "azurerm_private_endpoint" "Endpoint" {
-  name                        = "Endpoint"
-  location                    = local.location
-  resource_group_name         = local.resource_group
-  subnet_id                   = "azurerm_subnet.SubnetA.id"
+resource "azurerm_private_endpoint" "keyvault" {
+   name                = "key_vault-terraform-endpoint"
+   location            = local.location
+   resource_group_name = local.resource_group
+   subnet_id           = "azurerm_subnet.SubnetA.id"
 
   private_service_connection {
-    name                           = "test"
+    name                           = "key_vault-terraform-privateserviceconnection"
     private_connection_resource_id = azurerm_key_vault.app_vault.id
+    subresource_names              = [ "vault" ]
     is_manual_connection           = false
-    subresource_names = ["Vault"]
+  }
+
+ private_dns_zone_group {
+    name = data.azurerm_private_dns_zone.key_vault_dns_private_zone.name
+   private_dns_zone_ids = [data.azurerm_private_dns_zone.key_vault_dns_private_zone.id]
   }
 }
 
