@@ -17,92 +17,143 @@ provider "azurerm" {
   tenant_id       = "6a7cad51-05b4-4ea3-8435-b2157749ac6b"
 }
 
-
-locals {
-  resource_group="app-grp"
-  location="North Europe"
-}
-
 data "azurerm_client_config" "current" {}
 
-resource "azurerm_resource_group" "app_grp"{
-  name=local.resource_group
-  location=local.location
+resource "azurerm_resource_group" "example" {
+  name     = "example-resources"
+  location = "West Europe"
 }
 
-resource "azurerm_virtual_network" "app_network" {
-  name                = "app-network"
-  location            = local.location
-  resource_group_name = azurerm_resource_group.app_grp.name
+resource "azurerm_virtual_network" "example" {
+  name                = "example-network"
   address_space       = ["10.0.0.0/16"]
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
 }
 
-resource "azurerm_subnet" "Subnet" {
-  name                 = "Subnet"
-  resource_group_name  = local.resource_group
-  virtual_network_name = azurerm_virtual_network.app_network.name
+resource "azurerm_subnet" "service" {
+  name                 = "service"
+  resource_group_name  = azurerm_resource_group.example.name
+  virtual_network_name = azurerm_virtual_network.example.name
   address_prefixes     = ["10.0.1.0/24"]
-  depends_on = [
-    azurerm_virtual_network.app_network
-  ]
+
+  enforce_private_link_service_network_policies = true
 }
-resource "azurerm_subnet" "subnet_KV" {
-  name                 = "subnetB"
-  resource_group_name  = local.resource_group
-  virtual_network_name = azurerm_virtual_network.app_network.name
+
+resource "azurerm_subnet" "endpoint" {
+  name                 = "endpoint"
+  resource_group_name  = azurerm_resource_group.example.name
+  virtual_network_name = azurerm_virtual_network.example.name
   address_prefixes     = ["10.0.2.0/24"]
-  depends_on = [
-    azurerm_virtual_network.app_network
-  ]
+
+  enforce_private_link_endpoint_network_policies = true
+}
+
+resource "azurerm_public_ip" "example" {
+  name                = "example-pip"
+  sku                 = "Standard"
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+  allocation_method   = "Static"
 }
 
 resource "azurerm_network_interface" "app_interface" {
   name                = "app-interface"
-  location            = local.location
-  resource_group_name = local.resource_group
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = azurerm_subnet.Subnet.id
+    subnet_id                     = azurerm_subnet.endpoint.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id = azurerm_public_ip.app_public_ip.id
+    public_ip_address_id = azurerm_public_ip.example.id
   }
 
   depends_on = [
     azurerm_virtual_network.app_network,
     azurerm_public_ip.app_public_ip
   ]
+resource "azurerm_windows_virtual_machine" "app_vm" {
+  name                = "appvm"
+  resource_group_name = azurerm_resource_group.example.name
+  location            = azurerm_resource_group.example.location
+  size                = "Standard_D2s_v3"
+  admin_username      = "demuser"
+  admin_password      = Admin@123
+  network_interface_ids = [
+    azurerm_network_interface.app_interface.id,
+  ]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "MicrosoftWindowsServer"
+    offer     = "WindowsServer"
+    sku       = "2019-Datacenter"
+    version   = "latest"
+  }
+
+
+
+
+resource "azurerm_lb" "example" {
+  name                = "example-lb"
+  sku                 = "Standard"
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+
+  frontend_ip_configuration {
+    name                 = azurerm_public_ip.example.name
+    public_ip_address_id = azurerm_public_ip.example.id
+  }
 }
 
-resource "azurerm_public_ip" "app_public_ip" {
-  name                = "app-public-ip"
-  resource_group_name = local.resource_group
-  location            = local.location
-  allocation_method   = "Static"
-  depends_on = [
-    azurerm_resource_group.app_grp
+resource "azurerm_private_link_service" "example" {
+  name                = "example-privatelink"
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+
+  nat_ip_configuration {
+    name      = azurerm_public_ip.example.name
+    primary   = true
+    subnet_id = azurerm_subnet.service.id
+  }
+
+  load_balancer_frontend_ip_configuration_ids = [
+    azurerm_lb.example.frontend_ip_configuration.0.id,
   ]
 }
 
+resource "azurerm_private_endpoint" "example" {
+  name                = "example-endpoint"
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+  subnet_id           = azurerm_subnet.endpoint.id
+
+  private_service_connection {
+    name                           = "example-privateserviceconnection"
+    private_connection_resource_id = azurerm_private_link_service.example.id
+    is_manual_connection           = false
+  }
+}
+l
 resource "azurerm_key_vault" "app_vault" {  
-  name                        = "appvault9087878"
-  location                    = local.location
-  resource_group_name         = local.resource_group  
+  name                        = "appvault9081878"
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name 
   tenant_id                   = data.azurerm_client_config.current.tenant_id
   soft_delete_retention_days  = 7
   purge_protection_enabled    = false
   sku_name = "standard"
-
-access_policy {
-    tenant_id = "6a7cad51-05b4-4ea3-8435-b2157749ac6b"
-    object_id = "4bbcfb7b-8415-4828-aee5-c19aa18500d4"
-
-    secret_permissions = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
-  }
-
-  depends_on = [
-    azurerm_resource_group.app_grp,
-  
-  ]
-}
-
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = data.azurerm_client_config.current.object_id
+    key_permissions = [
+      "get",
+    ]
+    secret_permissions = [
+      "get", "backup", "delete", "list", "purge", "recover", "restore", "set",
+    ]
