@@ -63,7 +63,7 @@ resource "azurerm_network_interface" "app_interface" {
 
   ip_configuration {
     name                          = "internal"
-    subnet_id                     = azurerm_subnet.SubnetA.id
+    subnet_id                     = azurerm_subnet.Subnet.id
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id = azurerm_public_ip.app_public_ip.id
   }
