@@ -45,16 +45,24 @@ resource "azurerm_subnet" "SubnetA" {
     azurerm_virtual_network.app_network
   ]
 }
+resource "azurerm_subnet" "subnetB" {
+  name                 = "subnetB"
+  resource_group_name  = local.resource_group
+  virtual_network_name = azurerm_virtual_network.app_network.name
+  address_prefixes     = ["10.0.2.0/24"]
+  depends_on = [
+    azurerm_virtual_network.app_network
+  ]
 resource "azurerm_private_endpoint" "example" {
   name                = "testprivateenpoint"
   location            = local.location 
   resource_group_name = local.resource_group
-  subnet_id           = azurerm_subnet.subnet.id
+  subnet_id           = azurerm_subnet.subnetB.id
 
  private_service_connection {
     name                           = "test"
     is_manual_connection           = false
-    private_connection_resource_id = azurerm_windows_virtual_machine.vm.id
+    private_connection_resource_id = azurerm_windows_virtual_machine.app_vm.id
     subresource_names              = ["virtualMachines"]
   }
 
