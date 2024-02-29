@@ -56,8 +56,6 @@ resource "azurerm_subnet" "subnet_KV" {
   ]
 }
 
-}
-
 resource "azurerm_network_interface" "app_interface" {
   name                = "app-interface"
   location            = local.location
