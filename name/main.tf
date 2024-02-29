@@ -34,7 +34,6 @@ resource "azurerm_subnet" "service" {
   virtual_network_name = azurerm_virtual_network.example.name
   address_prefixes     = ["10.0.1.0/24"]
 
-  enforce_private_link_service_network_policies = true
 }
 
 resource "azurerm_subnet" "endpoint" {
@@ -68,7 +67,7 @@ resource "azurerm_network_interface" "app_interface" {
   }
 
   depends_on = [
-    azurerm_virtual_network.app_network,
+    azurerm_virtual_network.example,
     azurerm_public_ip.example
   ]
 }
@@ -102,6 +101,17 @@ resource "azurerm_windows_virtual_machine" "app_vm" {
    
   ]
 }
+resource "azurerm_lb" "example" {
+  name                = "example-lb"
+  sku                 = "Standard"
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+
+  frontend_ip_configuration {
+    name                 = azurerm_public_ip.example.name
+    public_ip_address_id = azurerm_public_ip.example.id
+  }
+}
 
 resource "azurerm_private_link_service" "example" {
   name                = "example-privatelink"
@@ -113,6 +123,9 @@ resource "azurerm_private_link_service" "example" {
     primary   = true
     subnet_id = azurerm_subnet.service.id
   }
+load_balancer_frontend_ip_configuration_ids = [
+    azurerm_lb.example.frontend_ip_configuration.0.id,
+  ]
 }
 
 
