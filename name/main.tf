@@ -128,6 +128,6 @@ access_policy {
 resource "azurerm_key_vault_secret" "vmpassword" {
   name         = "vmpassword"
   value        = "Azure@123"
-  key_vault_id = azurerm_key_vault.app_vaut.id
+  key_vault_id = azurerm_key_vault.app_vault.id
   depends_on = [ azurerm_key_vault.app_vault ]
 }
