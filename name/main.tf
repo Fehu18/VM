@@ -55,7 +55,6 @@ resource "azurerm_subnet" "subnetB" {
   ]
 }
 
-}
 resource "azurerm_private_endpoint" "Endpoint" {
   name                        = "Endpoint"
   location                    = local.location
