@@ -59,7 +59,7 @@ resource "azurerm_private_endpoint" "Endpoint" {
   name                        = "Endpoint"
   location                    = local.location
   resource_group_name         = local.resource_group
-  subnet_id                   = "azurerm_subnet.subnetB.id"
+  subnet_id                   = "azurerm_subnet.SubnetA.id"
 
   private_service_connection {
     name                           = "test"
