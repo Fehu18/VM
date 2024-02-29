@@ -9,8 +9,7 @@ terraform {
       version = "~>3.0"
     }
   }
-
-
+}
 provider "azurerm" {
   features {}
   subscription_id = "dd841e0c-a76f-4d5d-ae2f-b0645b248ae5"
