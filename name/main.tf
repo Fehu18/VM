@@ -37,8 +37,8 @@ resource "azurerm_virtual_network" "app_network" {
   address_space       = ["10.0.0.0/16"]
 }
 
-resource "azurerm_subnet" "SubnetA" {
-  name                 = "SubnetA"
+resource "azurerm_subnet" "Subnet" {
+  name                 = "Subnet"
   resource_group_name  = local.resource_group
   virtual_network_name = azurerm_virtual_network.app_network.name
   address_prefixes     = ["10.0.1.0/24"]
@@ -61,7 +61,7 @@ resource "azurerm_private_endpoint" "keyvault" {
    name                = "key_vault-terraform-endpoint"
    location            = local.location
    resource_group_name = local.resource_group
-   subnet_id           = "azurerm_subnet.SubnetA.id"
+   subnet_id           = "azurerm_subnet.Subnet.id"
 
   private_service_connection {
     name                           = "key_vault-terraform-privateserviceconnection"
