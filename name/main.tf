@@ -54,26 +54,31 @@ resource "azurerm_subnet" "subnetB" {
     azurerm_virtual_network.app_network
   ]
 }
+resource "azurerm_private_link_service" "example1" {
+  name                        = "example1"
+  location                    = local.location
+  resource_group_name         = local.resource_group
 
-resource "azurerm_private_endpoint" "example" {
-  name                = "example"
-  location            = local.location 
-  resource_group_name = local.resource_group
-  subnet_id           = azurerm_subnet.subnetB.id
-
-  depends_on          = [
-azurerm_key_vault.app_vault
-]
-
- private_service_connection {
-    name                           = "test"
-    is_manual_connection           = false
-    private_connection_resource_id = azurerm_windows_virtual_machine.app_vm.id
-    subresource_names              = ["virtualMachines"]
+  nat_ip_configuration {
+    name      = azurerm_public_ip.example.name
+    primary   = true
+    subnet_id = "azurerm_subnet.subnetB.id"
   }
 
 }
+resource "azurerm_private_endpoint" "Endpoint" {
+  name                        = "Endpoint"
+  location                    = local.location
+  resource_group_name         = local.resource_group
+  subnet_id                   = "azurerm_subnet.subnetB.id"
 
+  private_service_connection {
+    name                           = "test"
+    private_connection_resource_id = azurerm_key_vault.app_vault.id
+    is_manual_connection           = false
+    subresource_names = ["Vault"]
+  }
+}
 
 resource "azurerm_network_interface" "app_interface" {
   name                = "app-interface"
