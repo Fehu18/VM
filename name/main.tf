@@ -97,7 +97,7 @@ resource "azurerm_windows_virtual_machine" "app_vm" {
 
 resource "azurerm_public_ip" "app_public_ip" {
   name                = "app-public-ip"
-  resource_group_name = local.resource_group
+  resource_group_name = "app-test"
   location            = local.location
   allocation_method   = "Static"
   depends_on = [
