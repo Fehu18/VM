@@ -56,20 +56,6 @@ resource "azurerm_subnet" "subnet_KV" {
   ]
 }
 
-
-resource "azurerm_private_endpoint" "keyvault" {
-   name                = "key_vault-terraform-endpoint"
-   location            = local.location
-   resource_group_name = local.resource_group
-   subnet_id           = "azurerm_subnet.Subnet.id"
-
-  private_service_connection {
-    name                           = "key_vault-terraform-privateserviceconnection"
-    private_connection_resource_id = azurerm_key_vault.app_vault.id
-    subresource_names              = [ "vault" ]
-    is_manual_connection           = false
-  }
-
 }
 
 resource "azurerm_network_interface" "app_interface" {
@@ -140,4 +126,14 @@ resource "azurerm_key_vault" "app_vault" {
   depends_on = [
     azurerm_resource_group.app_grp
   ]
+}
+
+# We are creating a secret in the key vault
+resource "azurerm_key_vault_secret" "vmpassword" {
+  name         = "vmpassword"
+  value        = "Azure@123"
+  key_vault_id = azurerm_key_vault.app_vault.id
+  depends_on = [ 
+          azurerm_key_vault.app_vault 
+]
 }
