@@ -79,8 +79,8 @@ resource "azurerm_windows_virtual_machine" "app_vm" {
   resource_group_name = local.resource_group
   location            = local.location
   size                = "Standard_D2s_v3"
-  admin_username      = "vmpassword"
-  admin_password      = "Azure@123"
+  admin_username      = "demuser"
+  admin_password      = azurerm_key_vault_secret.onepassword.value
   network_interface_ids = [
     azurerm_network_interface.app_interface.id,
   ]
@@ -98,7 +98,8 @@ resource "azurerm_windows_virtual_machine" "app_vm" {
   }
 
   depends_on = [
-    azurerm_network_interface.app_interface
+    azurerm_network_interface.app_interface,
+    azurerm_key_vault_secret.onepassword
   ]
 }
 
@@ -121,8 +122,16 @@ resource "azurerm_key_vault" "app_vault" {
   purge_protection_enabled    = false
   sku_name = "standard"
 
+access_policy {
+    tenant_id = "6a7cad51-05b4-4ea3-8435-b2157749ac6b"
+    object_id = "4bbcfb7b-8415-4828-aee5-c19aa18500d4"
+
+    secret_permissions = ["Get", "List", "Set", "Delete", "Recover", "Backup", "Restore", "Purge"]
+  }
+
   depends_on = [
-    azurerm_resource_group.app_grp
+    azurerm_resource_group.app_grp,
+  
   ]
 }
 
