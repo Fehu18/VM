@@ -56,7 +56,6 @@ resource "azurerm_subnet" "subnet_KV" {
   ]
 }
 
-}
 
 resource "azurerm_private_endpoint" "keyvault" {
    name                = "key_vault-terraform-endpoint"
