@@ -54,16 +54,6 @@ resource "azurerm_subnet" "subnetB" {
     azurerm_virtual_network.app_network
   ]
 }
-resource "azurerm_private_link_service" "example1" {
-  name                        = "example1"
-  location                    = local.location
-  resource_group_name         = local.resource_group
-
-  nat_ip_configuration {
-    name      = azurerm_public_ip.example.name
-    primary   = true
-    subnet_id = "azurerm_subnet.subnetB.id"
-  }
 
 }
 resource "azurerm_private_endpoint" "Endpoint" {
