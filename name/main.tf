@@ -116,8 +116,7 @@ resource "azurerm_windows_virtual_machine" "app_vm" {
   }
 
   depends_on = [
-    azurerm_network_interface.app_interface,
-    azurerm_key_vault_secret.vmpassword
+    azurerm_network_interface.app_interface
   ]
 }
 
