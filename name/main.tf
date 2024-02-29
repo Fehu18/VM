@@ -45,6 +45,21 @@ resource "azurerm_subnet" "SubnetA" {
     azurerm_virtual_network.app_network
   ]
 }
+resource "azurerm_private_endpoint" "example" {
+  name                = "testprivateenpoint"
+  location            = local.location 
+  resource_group_name = local.resource_group
+  subnet_id           = azurerm_subnet.subnet.id
+
+ private_service_connection {
+    name                           = "test"
+    is_manual_connection           = false
+    private_connection_resource_id = azurerm_windows_virtual_machine.vm.id
+    subresource_names              = ["virtualMachines"]
+  }
+
+}
+
 
 resource "azurerm_network_interface" "app_interface" {
   name                = "app-interface"
