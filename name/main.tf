@@ -8,16 +8,6 @@ terraform {
       version = "~>3.0"
     }
   }
-provider "azurerm" {
- version = "~>3.0"
-  alias            = "dnsprod"
-  subscription_id = "dd841e0c-a76f-4d5d-ae2f-b0645b248ae5"
-  tenant_id       = "6a7cad51-05b4-4ea3-8435-b2157749ac6b"
-  skip_provider_registration = true
-  features {}
-
-  use_msi = true
-}
 
  
 }
@@ -65,10 +55,7 @@ resource "azurerm_subnet" "subnet_KV" {
     azurerm_virtual_network.app_network
   ]
 }
-data "azurerm_private_dns_zone" "key_vault_dns_private_zone" {
-  name     = "privatelink.vaultcore.azure.net"
-  provider = azurerm.dnsprod
-  resource_group_name = local.resource_group
+
 }
 
 resource "azurerm_private_endpoint" "keyvault" {
@@ -84,10 +71,6 @@ resource "azurerm_private_endpoint" "keyvault" {
     is_manual_connection           = false
   }
 
- private_dns_zone_group {
-    name = data.azurerm_private_dns_zone.key_vault_dns_private_zone.name
-   private_dns_zone_ids = [data.azurerm_private_dns_zone.key_vault_dns_private_zone.id]
-  }
 }
 
 resource "azurerm_network_interface" "app_interface" {
