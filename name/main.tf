@@ -56,10 +56,11 @@ resource "azurerm_subnet" "subnetB" {
 }
 
 resource "azurerm_private_endpoint" "example" {
-  name                = "testprivateenpoint"
+  name                = "example"
   location            = local.location 
   resource_group_name = local.resource_group
   subnet_id           = azurerm_subnet.subnetB.id
+
   depends_on          = [
 azurerm_key_vault.app_vault
 ]
