@@ -130,3 +130,4 @@ resource "azurerm_key_vault_secret" "vmpassword" {
   value        = "Azure@123"
   key_vault_id = azurerm_key_vault.app_vaut.id
   depends_on = [ azurerm_key_vault.app_vault ]
+}
