@@ -34,7 +34,7 @@ resource "azurerm_resource_group" "app_test"{
 resource "azurerm_virtual_network" "app_network" {
   name                = "app-network"
   location            = local.location
-  resource_group_name = azurerm_resource_group.app_grp.name
+  resource_group_name = azurerm_resource_group.app_test.name
   address_space       = ["10.0.0.0/16"]
 }
 
@@ -101,11 +101,11 @@ resource "azurerm_public_ip" "app_public_ip" {
   location            = local.location
   allocation_method   = "Static"
   depends_on = [
-    azurerm_resource_group.app_grp
+    azurerm_resource_group.app_test
   ]
 }
 
-resource "azurerm_key_vault" "app_vaul" {  
+resource "azurerm_key_vault" "app_vault" {  
   name                        = "appvault908942"
   location                    = local.location
   resource_group_name         = local.resource_group  
@@ -127,6 +127,6 @@ access_policy {
 resource "azurerm_key_vault_secret" "vmpassword" {
   name         = "vmpassword"
   value        = "Azure@123"
-  key_vault_id = azurerm_key_vault.app_vaul.id
-  depends_on = [ azurerm_key_vault.app_vaul ]
+  key_vault_id = azurerm_key_vault.app_vault.id
+  depends_on = [ azurerm_key_vault.app_vault ]
 }
