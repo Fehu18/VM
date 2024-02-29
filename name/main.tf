@@ -53,6 +53,8 @@ resource "azurerm_subnet" "subnetB" {
   depends_on = [
     azurerm_virtual_network.app_network
   ]
+}
+
 resource "azurerm_private_endpoint" "example" {
   name                = "testprivateenpoint"
   location            = local.location 
