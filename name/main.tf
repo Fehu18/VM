@@ -108,23 +108,40 @@ resource "azurerm_key_vault" "app_vault" {
   soft_delete_retention_days  = 7
   purge_protection_enabled    = false
   sku_name = "standard"
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.object_id
-    key_permissions = [
-      "get",
-    ]
-    secret_permissions = [
-      "get", "backup", "delete", "list", "purge", "recover", "restore", "set",
-    ]
-    storage_permissions = [
-      "get",
-    ]
-  }
-  depends_on = [
-    azurerm_resource_group.app_grp
+
+resource "azurerm_key_vault_access_policy" "example" {
+  key_vault_id = azurerm_key_vault.example.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = data.azurerm_client_config.current.object_id
+
+  key_permissions = [
+    "Get",
+  ]
+
+  secret_permissions = [
+    "Get",
   ]
 }
+
+data "azuread_service_principal" "terraform" {
+  display_name = "terraform"
+}
+
+resource "azurerm_key_vault_access_policy" "example-principal" {
+  key_vault_id = azurerm_key_vault.app_vault.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = data.azuread_service_principal.terraform.object_id
+
+  key_permissions = [
+    "Get", "List", "Encrypt", "Decrypt"
+  ]
+}
+depends_on = [
+    azurerm_resource_group.app_grp
+  ]
+
+}
+
 
 # We are creating a secret in the key vault
 resource "azurerm_key_vault_secret" "vmpassword" {
